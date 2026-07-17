@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aurox screencast — transcript diff</title>
+<style>
+  body { margin: 0; background: #16161e; color: #c8d0e0; font: 14px/1.5 system-ui, sans-serif; }
+  main { max-width: 1400px; margin: 1.5rem auto; padding: 0 1rem; }
+  a { color: #7aa2f7; }
+  .controls { display: flex; gap: .75rem; align-items: center; margin: 1rem 0; flex-wrap: wrap; }
+  select { font: inherit; padding: .3rem .7rem; border-radius: 5px; border: 1px solid #414868; background: #1f2335; color: #ddd; }
+  .summary { font-weight: 600; }
+  .summary .add { color: #9ece6a; } .summary .del { color: #f7768e; }
+  .diff { border: 1px solid #292e42; border-radius: 6px; overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 12.5px; }
+  td { padding: 0 .5rem; white-space: pre; vertical-align: top; }
+  td.ln { text-align: right; color: #545c7e; user-select: none; width: 1%; border-right: 1px solid #292e42; }
+  td.txt { width: 49%; }
+  tr.same td.txt { color: #a9b1d6; }
+  tr.del  .base { background: #3a2233; color: #f7768e; }
+  tr.add  .pr   { background: #22331f; color: #9ece6a; }
+  tr.change .base { background: #3a2233; } tr.change .pr { background: #22331f; }
+  .empty { background: #1a1b26; }
+  h1 small { color: #808bb5; font-weight: 400; }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">aurox — transcript diff <small>base <code>main</code> vs PR</small></h1>
+  <div class="controls">
+    <label>demo:
+      <select id="demo">
+        <option value="search-install">search-install</option>
+        <option value="cli-install">cli-install</option>
+        <option value="repo-install">repo-install</option>
+        <option value="upgrade">upgrade</option>
+      </select>
+    </label>
+    <span class="summary" id="summary"></span>
+  </div>
+  <div class="diff"><table id="table"><tbody></tbody></table></div>
+  <p><a href="./">all recordings</a> · <a id="sidebyside" href="#">▶ watch base vs PR side by side</a> · wall-clock stamps are normalized (<code>(DATE)</code>/<code>(AGE ago)</code>) so only real output changes show.</p>
+</main>
+<script>
+  const q = new URLSearchParams(location.search);
+  const pr = q.get('pr');
+  const demoSel = document.getElementById('demo');
+  demoSel.value = q.get('demo') || 'search-install';
+  if (pr && !/^\d+$/.test(pr)) { document.getElementById('title').textContent = 'invalid ?pr='; throw 0; }
+  document.getElementById('sidebyside').href = 'compare.html?pr=' + (pr || '') + '&demo=' + demoSel.value;
+
+  const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  // O(n*m) LCS line diff — transcripts are ~100 lines, so this is instant.
+  function diff(a, b) {
+    const n = a.length, m = b.length;
+    const dp = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+    for (let i = n - 1; i >= 0; i--)
+      for (let j = m - 1; j >= 0; j--)
+        dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    const rows = []; let i = 0, j = 0;
+    while (i < n && j < m) {
+      if (a[i] === b[j]) rows.push({ t: 'same', a: a[i], b: b[j], i: ++i, j: ++j });
+      else if (dp[i + 1][j] >= dp[i][j + 1]) rows.push({ t: 'del', a: a[i], b: null, i: ++i, j: null });
+      else rows.push({ t: 'add', a: null, b: b[j], i: null, j: ++j });
+    }
+    while (i < n) rows.push({ t: 'del', a: a[i], b: null, i: ++i, j: null });
+    while (j < m) rows.push({ t: 'add', a: null, b: b[j], i: null, j: ++j });
+    // pair a deletion immediately followed by an addition into one change row
+    const out = [];
+    for (let k = 0; k < rows.length; k++) {
+      if (rows[k].t === 'del' && rows[k + 1] && rows[k + 1].t === 'add') {
+        out.push({ t: 'change', a: rows[k].a, b: rows[k + 1].b, i: rows[k].i, j: rows[k + 1].j }); k++;
+      } else out.push(rows[k]);
+    }
+    return out;
+  }
+
+  async function text(path) {
+    const r = await fetch(path);
+    if (!r.ok) return null;
+    return (await r.text()).replace(/\n$/, '').split('\n');
+  }
+
+  async function render(name) {
+    document.getElementById('sidebyside').href = 'compare.html?pr=' + (pr || '') + '&demo=' + name;
+    const tbody = document.querySelector('#table tbody');
+    const base = await text(`main/${name}.txt`);
+    const head = await text(`${pr ? 'pr-' + pr : 'main'}/${name}.txt`);
+    if (!head || !base) {
+      tbody.innerHTML = `<tr><td class="txt">transcript not published yet (${base ? '' : 'base '}${head ? '' : 'PR'} missing)</td></tr>`;
+      document.getElementById('summary').textContent = '';
+      return;
+    }
+    const rows = diff(base, head);
+    let adds = 0, dels = 0, html = '';
+    for (const r of rows) {
+      if (r.t === 'add') adds++; else if (r.t === 'del') dels++; else if (r.t === 'change') { adds++; dels++; }
+      const bcell = r.a == null ? '<td class="txt base empty"></td>' : `<td class="txt base">${esc(r.a)}</td>`;
+      const pcell = r.b == null ? '<td class="txt pr empty"></td>' : `<td class="txt pr">${esc(r.b)}</td>`;
+      html += `<tr class="${r.t}"><td class="ln">${r.i ?? ''}</td>${bcell}<td class="ln">${r.j ?? ''}</td>${pcell}</tr>`;
+    }
+    tbody.innerHTML = html;
+    const s = document.getElementById('summary');
+    s.innerHTML = (adds || dels)
+      ? `<span class="add">+${adds}</span> <span class="del">−${dels}</span> lines changed vs <code>main</code>`
+      : 'no output change vs <code>main</code> (wall-clock normalized)';
+    document.getElementById('title').innerHTML = `aurox ${name} — transcript diff <small>base <code>main</code> vs PR #${pr || '—'}</small>`;
+  }
+
+  demoSel.addEventListener('change', e => render(e.target.value));
+  render(demoSel.value);
+</script>
+</body>
+</html>
