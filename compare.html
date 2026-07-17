@@ -61,10 +61,12 @@
   function mount(name) {
     destroy();
     document.getElementById('title').textContent = `aurox ${name} — base vs PR #${pr || '?'}`;
-    const base = pr ? AsciinemaPlayer.create(`main/${name}.cast`, document.getElementById('base'),
-      { fit: 'width', theme: 'dracula', controls: false }) : null;
+    // preload so getDuration() resolves before first play — the shared scrub
+    // bar needs the durations to size itself.
+    const opts = { fit: 'width', theme: 'dracula', controls: false, preload: true };
+    const base = pr ? AsciinemaPlayer.create(`main/${name}.cast`, document.getElementById('base'), opts) : null;
     const head = AsciinemaPlayer.create(`${pr ? 'pr-' + pr : 'main'}/${name}.cast`,
-      document.getElementById('pr'), { fit: 'width', theme: 'dracula', controls: false });
+      document.getElementById('pr'), opts);
     document.getElementById('base-cap').textContent = pr ? 'main (base)' : 'main';
     document.getElementById('pr-cap').textContent = pr ? `PR #${pr}` : 'main';
     players = [base, head].filter(Boolean);
