@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>aurox screencast — base vs PR</title>
+<link rel="stylesheet" href="player/asciinema-player.css">
+<style>
+  body { margin: 0; background: #16161e; color: #ddd; font: 15px/1.5 system-ui, sans-serif; }
+  main { max-width: 1400px; margin: 1.5rem auto; padding: 0 1rem; }
+  a { color: #7aa2f7; }
+  .controls { display: flex; gap: .75rem; align-items: center; margin: 1rem 0; flex-wrap: wrap; }
+  .controls button, .controls select { font: inherit; padding: .3rem .7rem; border-radius: 5px;
+    border: 1px solid #414868; background: #1f2335; color: #ddd; cursor: pointer; }
+  .controls input[type=range] { flex: 1; min-width: 200px; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .pair figure { margin: 0; }
+  .pair figcaption { font-weight: 600; margin-bottom: .4rem; }
+  .pair .pr figcaption { color: #9ece6a; }
+  .pair .base figcaption { color: #808bb5; }
+  @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1 id="title">aurox screencast — base vs PR</h1>
+  <div class="controls">
+    <label>demo:
+      <select id="demo">
+        <option value="search-install">search-install</option>
+        <option value="cli-install">cli-install</option>
+        <option value="repo-install">repo-install</option>
+        <option value="upgrade">upgrade</option>
+      </select>
+    </label>
+    <button id="playpause">▶ play both</button>
+    <input id="scrub" type="range" min="0" max="100" step="0.1" value="0">
+    <span id="clock">0.0s</span>
+  </div>
+  <div class="pair">
+    <figure class="base"><figcaption id="base-cap">main (base)</figcaption><div id="base"></div></figure>
+    <figure class="pr"><figcaption id="pr-cap">this PR</figcaption><div id="pr"></div></figure>
+  </div>
+  <p><a href="./">all recordings</a> — one scrub bar drives both players so you can line up base and PR frame for frame.</p>
+</main>
+<script src="player/asciinema-player.min.js"></script>
+<script>
+  const q = new URLSearchParams(location.search);
+  const pr = q.get('pr');                 // e.g. "52" -> pr-52/
+  const demo = q.get('demo') || 'search-install';
+  document.getElementById('demo').value = demo;
+  if (pr && !/^\d+$/.test(pr)) { document.getElementById('title').textContent = 'invalid ?pr='; throw 0; }
+
+  let players = [], raf = 0, playing = false;
+  const scrub = document.getElementById('scrub');
+  const clock = document.getElementById('clock');
+  const btn = document.getElementById('playpause');
+
+  function destroy() { players.forEach(p => p.dispose && p.dispose()); players = []; cancelAnimationFrame(raf); playing = false; btn.textContent = '▶ play both'; }
+
+  function mount(name) {
+    destroy();
+    document.getElementById('title').textContent = `aurox ${name} — base vs PR #${pr || '?'}`;
+    const base = pr ? AsciinemaPlayer.create(`main/${name}.cast`, document.getElementById('base'),
+      { fit: 'width', theme: 'dracula', controls: false }) : null;
+    const head = AsciinemaPlayer.create(`${pr ? 'pr-' + pr : 'main'}/${name}.cast`,
+      document.getElementById('pr'), { fit: 'width', theme: 'dracula', controls: false });
+    document.getElementById('base-cap').textContent = pr ? 'main (base)' : 'main';
+    document.getElementById('pr-cap').textContent = pr ? `PR #${pr}` : 'main';
+    players = [base, head].filter(Boolean);
+    // Resolve durations once loaded, then size the scrub bar to the longer clip.
+    const t = setInterval(() => {
+      const ds = players.map(p => p.getDuration()).filter(d => d != null);
+      if (ds.length === players.length) { clearInterval(t); scrub.max = Math.max(...ds).toFixed(1); }
+    }, 200);
+  }
+
+  function seekAll(pos) { players.forEach(p => p.seek(pos)); clock.textContent = (+pos).toFixed(1) + 's'; }
+
+  scrub.addEventListener('input', () => { pauseAll(); seekAll(scrub.value); });
+
+  function pauseAll() { players.forEach(p => p.pause()); playing = false; btn.textContent = '▶ play both'; cancelAnimationFrame(raf); }
+  function playAll() {
+    players.forEach(p => p.play()); playing = true; btn.textContent = '⏸ pause';
+    const tick = () => {
+      if (!playing || !players[0]) return;
+      const t = players[0].getCurrentTime();
+      scrub.value = t; clock.textContent = t.toFixed(1) + 's';
+      if (t >= +scrub.max) { pauseAll(); return; }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+  btn.addEventListener('click', () => (playing ? pauseAll() : playAll()));
+  document.getElementById('demo').addEventListener('change', e => mount(e.target.value));
+
+  mount(demo);
+</script>
+</body>
+</html>
