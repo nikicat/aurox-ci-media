@@ -58,16 +58,25 @@
 
   function destroy() { players.forEach(p => p.dispose && p.dispose()); players = []; cancelAnimationFrame(raf); playing = false; btn.textContent = '▶ play both'; }
 
-  function mount(name) {
+  async function mount(name) {
     destroy();
     document.getElementById('title').textContent = `aurox ${name} — base vs PR #${pr || '?'}`;
     // preload so getDuration() resolves before first play — the shared scrub
     // bar needs the durations to size itself.
     const opts = { fit: 'width', theme: 'dracula', controls: false, preload: true };
-    const base = pr ? AsciinemaPlayer.create(`main/${name}.cast`, document.getElementById('base'), opts) : null;
+    // main/ is empty until the first screencast PR merges (see the repo
+    // README), so there may be no base to compare against yet.
+    const hasBase = pr ? (await fetch(`main/${name}.cast`, { method: 'HEAD' })).ok : false;
+    const base = hasBase ? AsciinemaPlayer.create(`main/${name}.cast`, document.getElementById('base'), opts) : null;
     const head = AsciinemaPlayer.create(`${pr ? 'pr-' + pr : 'main'}/${name}.cast`,
       document.getElementById('pr'), opts);
-    document.getElementById('base-cap').textContent = pr ? 'main (base)' : 'main';
+    if (pr && !hasBase) {
+      document.getElementById('base').innerHTML =
+        '<p style="color:#808bb5;padding:2rem 1rem">No base recording on <code>main</code> yet — '
+        + 'this is the first screencast PR, so there is nothing to compare against. '
+        + 'Once it merges, <code>main</code> becomes the base for later PRs.</p>';
+    }
+    document.getElementById('base-cap').textContent = pr ? (hasBase ? 'main (base)' : 'main — no recording yet') : 'main';
     document.getElementById('pr-cap').textContent = pr ? `PR #${pr}` : 'main';
     players = [base, head].filter(Boolean);
     // Resolve durations once loaded, then size the scrub bar to the longer clip.

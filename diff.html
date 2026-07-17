@@ -88,9 +88,21 @@
     const tbody = document.querySelector('#table tbody');
     const base = await text(`main/${name}.txt`);
     const head = await text(`${pr ? 'pr-' + pr : 'main'}/${name}.txt`);
-    if (!head || !base) {
-      tbody.innerHTML = `<tr><td class="txt">transcript not published yet (${base ? '' : 'base '}${head ? '' : 'PR'} missing)</td></tr>`;
-      document.getElementById('summary').textContent = '';
+    const summaryEl = document.getElementById('summary');
+    if (!head) {
+      tbody.innerHTML = '<tr><td class="txt">PR transcript not published yet.</td></tr>';
+      summaryEl.textContent = '';
+      return;
+    }
+    if (!base) {
+      // main/ is empty until the first screencast PR merges — nothing to diff
+      // against, so show the PR transcript alone rather than a bogus diff.
+      tbody.innerHTML = head.map((l, k) =>
+        `<tr class="same"><td class="ln"></td><td class="txt empty"></td><td class="ln">${k + 1}</td><td class="txt pr">${esc(l)}</td></tr>`
+      ).join('');
+      summaryEl.innerHTML = 'no base on <code>main</code> yet — showing the PR transcript alone '
+        + '(this is the first screencast PR; <code>main</code> becomes the base once it merges)';
+      document.getElementById('title').innerHTML = `aurox ${name} — transcript <small>PR #${pr || '—'} (no base on <code>main</code> yet)</small>`;
       return;
     }
     const rows = diff(base, head);

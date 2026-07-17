@@ -1,0 +1,1 @@
+`main/` holds the **base** recordings that PRs are compared against — the Screencasts workflow refreshes it on each merge to aurox's `main` branch. It is empty until the first screencast-carrying PR (#52) merges; until then, per-PR compare/diff views correctly show "no base on main yet".

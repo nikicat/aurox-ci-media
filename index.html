@@ -13,15 +13,16 @@
 <body>
 <main>
   <h1>aurox screencasts</h1>
-  <p>CI artifacts for <a href="https://github.com/nikicat/aurox">aurox</a>.
-     Current <code>main</code> demos (interactive player):</p>
-  <ul>
-    <li><a href="play.html?cast=main/search-install.cast">search-install</a> — shell: search, stage, review gate, apply</li>
-    <li><a href="play.html?cast=main/cli-install.cast">cli-install</a> — one-shot <code>aurox -S</code> AUR install</li>
-    <li><a href="play.html?cast=main/repo-install.cast">repo-install</a> — pacman-parity repo fast path</li>
-    <li><a href="play.html?cast=main/upgrade.cast">upgrade</a> — whole-system repo + AUR upgrade</li>
-  </ul>
-  <p>Per-PR recordings live under <code>pr-&lt;N&gt;/</code> — links are posted on each PR's checks and in a comment. Each PR comment also links a <a href="compare.html">base-vs-PR side-by-side player</a> (<code>compare.html?pr=&lt;N&gt;</code>) with one shared scrub bar.</p>
+  <p>CI artifacts for <a href="https://github.com/nikicat/aurox">aurox</a>.</p>
+  <p><strong><code>main/</code> — base recordings.</strong> Refreshed by the Screencasts
+     workflow on each merge to aurox's <code>main</code> branch; PRs are compared against it.
+     <em>Empty until the first screencast-carrying PR merges</em> — so the compare/diff views
+     for the very first PR correctly show “no base on <code>main</code> yet”.</p>
+  <p><strong><code>pr-&lt;N&gt;/</code> — per-PR recordings.</strong> Linked from each PR's
+     <code>screencasts</code> status check, which also links the
+     <a href="compare.html">base-vs-PR side-by-side player</a> (<code>compare.html?pr=&lt;N&gt;</code>,
+     one shared scrub bar) and the <a href="diff.html">base-vs-PR text diff</a>
+     (<code>diff.html?pr=&lt;N&gt;</code>, normalized transcript).</p>
 </main>
 </body>
 </html>
