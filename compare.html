@@ -19,6 +19,10 @@
   .pair .pr figcaption { color: #9ece6a; }
   .pair .base figcaption { color: #808bb5; }
   @media (max-width: 900px) { .pair { grid-template-columns: 1fr; } }
+  /* once the shared bar has positioned the players, the per-pane ▶ overlays
+     only obscure the frame — and clicking one plays that pane alone,
+     desyncing the pair */
+  .pair.scrubbed .ap-overlay-start { display: none; }
 </style>
 </head>
 <body>
@@ -86,16 +90,24 @@
     }, 200);
   }
 
-  function seekAll(pos) { players.forEach(p => p.seek(pos)); clock.textContent = (+pos).toFixed(1) + 's'; }
+  function seekAll(pos) {
+    players.forEach(p => p.seek(pos)); clock.textContent = pos.toFixed(1) + 's';
+    document.querySelector('.pair').classList.add('scrubbed');
+  }
 
-  scrub.addEventListener('input', () => { pauseAll(); seekAll(scrub.value); });
+  // .value is a string, and asciinema-player rejects string seek targets
+  // ("invalid seek target") — the rejection vanishes into the unawaited
+  // seek() promise, so scrubbing silently no-ops without the coercion.
+  scrub.addEventListener('input', () => { pauseAll(); seekAll(+scrub.value); });
 
   function pauseAll() { players.forEach(p => p.pause()); playing = false; btn.textContent = '▶ play both'; cancelAnimationFrame(raf); }
   function playAll() {
     players.forEach(p => p.play()); playing = true; btn.textContent = '⏸ pause';
     const tick = () => {
-      if (!playing || !players[0]) return;
-      const t = players[0].getCurrentTime();
+      if (!playing || !players.length) return;
+      // furthest player, not players[0]: a base shorter than the PR stops
+      // early and would freeze the bar while the PR is still playing
+      const t = Math.max(...players.map(p => p.getCurrentTime()));
       scrub.value = t; clock.textContent = t.toFixed(1) + 's';
       if (t >= +scrub.max) { pauseAll(); return; }
       raf = requestAnimationFrame(tick);

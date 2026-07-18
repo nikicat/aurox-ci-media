@@ -12,7 +12,13 @@ there).
 - `play.html` + `player/` — self-hosted
   [asciinema-player](https://github.com/asciinema/asciinema-player) (v3.17.0):
   <https://nikicat.github.io/aurox-ci-media/play.html?cast=main/search-install.cast>
+- `compare.html?pr=<N>` / `diff.html?pr=<N>` — base-vs-PR side-by-side player
+  (one scrub bar drives both) and normalized transcript diff, linked from
+  each PR's `screencasts` check run.
 
-Junk repo by design: history rewrites, force-pushes, and wholesale pruning
-are all fair game — nothing here is a source of truth (casts and GIFs are
-reproducible from aurox itself via `demos/build.sh`).
+The recordings are regenerable artifacts — `demos/build.sh` in aurox
+reproduces them, so `pr-<N>/` dirs can be pruned freely. The Pages apps
+(`*.html` + `player/`) are maintained here, though: this repo is their
+source of truth. To hack on them locally, serve the repo root
+(`python -m http.server`) — the pages fetch casts/transcripts, so `file://`
+won't do.
