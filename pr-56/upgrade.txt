@@ -7,16 +7,16 @@ aurox shell — type `help` for commands, `quit` to leave
 aurox> upgrade
 2 upgrades staged
 transaction — 2 to install, 0 to remove
-1  local-repo  approved  loop-repo   1.0-1 → 2.0-1   2.79 KiB
+1  local-repo  approved  loop-repo   1.0-1 → 2.0-1   2.80 KiB
 2  aur         review    test-hello  1.0-1 → 1.4-1  48.00 KiB    (AGE ago)
--> total  📥 50.79 KiB
+-> total  📥 50.80 KiB
 test-hello needs review — run `review test-hello` (or `approve test-hello`)
 aurox [2 staged, 1 to review]> approve test-hello
 approved test-hello
 transaction — 2 to install, 0 to remove
 all approved — run `apply`
 aurox [2 staged]> apply
-:: 2 install · 50.79 KiB
+:: 2 install · 50.80 KiB
 :: about to elevate via sudo:
    sudo pacman -Syu --noconfirm
 Continue? yes
