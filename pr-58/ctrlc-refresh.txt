@@ -1,0 +1,11 @@
+            ___   __  ______  ____ _  __
+           /   | / / / / __ \/ __ \ |/ /
+  ^__^    / /| |/ / / / /_/ / / / /   /
+  (oo)   / ___ / /_/ / _, _/ /_/ /   |
+  (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.3.0
+aurox shell — type `help` for commands, `quit` to leave
+aurox> refresh
+:: refreshing AUR mirror
+         fetch ⠇ [  3s] handshake — TLS + HTTP smart-protocol setup
+refresh: interrupted
+aurox> quit
