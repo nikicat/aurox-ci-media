@@ -14,7 +14,10 @@ there).
   <https://nikicat.github.io/aurox-ci-media/play.html?cast=main/search-install.cast>
 - `compare.html?pr=<N>` / `diff.html?pr=<N>` — base-vs-PR side-by-side player
   (one scrub bar drives both) and normalized transcript diff, linked from
-  each PR's `screencasts` check run.
+  each PR's `screencasts` check run. Their demo dropdown is populated at
+  runtime (`player/demos.js`) from the dir's `manifest.json` — falling back to
+  a GitHub directory listing — so a new demo needs no edit here; it just shows
+  up.
 
 The recordings are regenerable artifacts — `demos/build.sh` in aurox
 reproduces them, so `pr-<N>/` dirs can be pruned freely. The Pages apps

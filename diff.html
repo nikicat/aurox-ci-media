@@ -30,11 +30,14 @@
   <h1 id="title">aurox — transcript diff <small>base <code>main</code> vs PR</small></h1>
   <div class="controls">
     <label>demo:
+      <!-- Populated at runtime from the transcripts in this dir (player/demos.js).
+           These options are only the offline last-resort fallback. -->
       <select id="demo">
         <option value="search-install">search-install</option>
         <option value="cli-install">cli-install</option>
         <option value="repo-install">repo-install</option>
         <option value="upgrade">upgrade</option>
+        <option value="ctrlc-refresh">ctrlc-refresh</option>
       </select>
     </label>
     <span class="summary" id="summary"></span>
@@ -42,13 +45,12 @@
   <div class="diff"><table id="table"><tbody></tbody></table></div>
   <p><a href="./">all recordings</a> · <a id="sidebyside" href="#">▶ watch base vs PR side by side</a> · wall-clock stamps are normalized (<code>(DATE)</code>/<code>(AGE ago)</code>) so only real output changes show.</p>
 </main>
+<script src="player/demos.js"></script>
 <script>
   const q = new URLSearchParams(location.search);
   const pr = q.get('pr');
   const demoSel = document.getElementById('demo');
-  demoSel.value = q.get('demo') || 'search-install';
   if (pr && !/^\d+$/.test(pr)) { document.getElementById('title').textContent = 'invalid ?pr='; throw 0; }
-  document.getElementById('sidebyside').href = 'compare.html?pr=' + (pr || '') + '&demo=' + demoSel.value;
 
   const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
 
@@ -122,7 +124,13 @@
   }
 
   demoSel.addEventListener('change', e => render(e.target.value));
-  render(demoSel.value);
+
+  // Build the demo list from the transcripts present in this dir, then diff the
+  // requested (or first available) one.
+  (async () => {
+    const demo = await auroxPopulateSelect(demoSel, auroxDir(pr), q.get('demo') || 'search-install');
+    render(demo);   // render() also refreshes the "watch side by side" link
+  })();
 </script>
 </body>
 </html>

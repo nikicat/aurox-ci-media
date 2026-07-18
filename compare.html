@@ -30,11 +30,14 @@
   <h1 id="title">aurox screencast — base vs PR</h1>
   <div class="controls">
     <label>demo:
+      <!-- Populated at runtime from the recordings in this dir (player/demos.js).
+           These options are only the offline last-resort fallback. -->
       <select id="demo">
         <option value="search-install">search-install</option>
         <option value="cli-install">cli-install</option>
         <option value="repo-install">repo-install</option>
         <option value="upgrade">upgrade</option>
+        <option value="ctrlc-refresh">ctrlc-refresh</option>
       </select>
     </label>
     <button id="playpause">▶ play both</button>
@@ -48,11 +51,10 @@
   <p><a href="./">all recordings</a> — one scrub bar drives both players so you can line up base and PR frame for frame.</p>
 </main>
 <script src="player/asciinema-player.min.js"></script>
+<script src="player/demos.js"></script>
 <script>
   const q = new URLSearchParams(location.search);
   const pr = q.get('pr');                 // e.g. "52" -> pr-52/
-  const demo = q.get('demo') || 'search-install';
-  document.getElementById('demo').value = demo;
   if (pr && !/^\d+$/.test(pr)) { document.getElementById('title').textContent = 'invalid ?pr='; throw 0; }
 
   let players = [], raf = 0, playing = false;
@@ -117,7 +119,13 @@
   btn.addEventListener('click', () => (playing ? pauseAll() : playAll()));
   document.getElementById('demo').addEventListener('change', e => mount(e.target.value));
 
-  mount(demo);
+  // Build the demo list from the recordings actually present in this dir, then
+  // open the requested (or first available) one.
+  (async () => {
+    const demo = await auroxPopulateSelect(
+      document.getElementById('demo'), auroxDir(pr), q.get('demo') || 'search-install');
+    mount(demo);
+  })();
 </script>
 </body>
 </html>
