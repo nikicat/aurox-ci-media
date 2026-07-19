@@ -7,10 +7,10 @@
 aurox shell — type `help` for commands, `quit` to leave
   5  extra/texlive-games 2026.1-1
       TeX Live - Games typesetting  [provides texlive-othello]
-  4  extra/ruby-mixlib-shellout 3.4.13-1
-      Run external commands on Unix
-  3  aur/test-hello 1.4-1 [1m]
+  4  aur/test-hello 1.4-1 [1m]
       aurox demo fixture: a small hello-world app with a visible build
+  3  extra/ruby-mixlib-shellout 3.4.13-1
+      Run external commands on Unix
   2  local-repo/repo-hello 1.0-1
       aurox demo fixture: a repo package with a real-sized payload
   1  extra/nwg-hello 0.4.5-1
