@@ -1,10 +1,11 @@
-❯ aurox hello
+❯ aurox
             ___   __  ______  ____ _  __
            /   | / / / / __ \/ __ \ |/ /
   ^__^    / /| |/ / / / /_/ / / / /   /
   (oo)   / ___ / /_/ / _, _/ /_/ /   |
   (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.3.0
 aurox shell — type `help` for commands, `quit` to leave
+aurox> search hello
   5  extra/texlive-games 2026.1-1
       TeX Live - Games typesetting  [provides texlive-othello]
   4  aur/test-hello 1.4-1 [1m]
