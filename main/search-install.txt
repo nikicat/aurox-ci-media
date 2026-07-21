@@ -3,12 +3,12 @@
            /   | / / / / __ \/ __ \ |/ /
   ^__^    / /| |/ / / / /_/ / / / /   /
   (oo)   / ___ / /_/ / _, _/ /_/ /   |
-  (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.3.0
+  (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.4.0
 aurox shell — type `help` for commands, `quit` to leave
 aurox> search hello
   5  extra/texlive-games 2026.1-1
       TeX Live - Games typesetting  [provides texlive-othello]
-  4  aur/test-hello 1.4-1 [1m]
+  4  aur/test-hello 1.4-1 [3m]
       aurox demo fixture: a small hello-world app with a visible build
   3  extra/ruby-mixlib-shellout 3.4.13-1
       Run external commands on Unix

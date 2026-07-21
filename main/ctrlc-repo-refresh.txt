@@ -2,7 +2,7 @@
            /   | / / / / __ \/ __ \ |/ /
   ^__^    / /| |/ / / / /_/ / / / /   /
   (oo)   / ___ / /_/ / _, _/ /_/ /   |
-  (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.3.0
+  (__)  /_/  |_\____/_/ |_|\____/_/|_|  v0.4.0
 aurox shell — type `help` for commands, `quit` to leave
 aurox> refresh pacman
  local-repo.db ⠹ [  2s]        0 B (0 B/s)                                                          -> official-repo refresh interrupted
