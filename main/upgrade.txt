@@ -14,7 +14,7 @@ test-hello needs review — run `review test-hello` (or `approve test-hello`)
 aurox [2 staged, 1 to review]> approve test-hello
 approved test-hello
 transaction — 2 to install, 0 to remove
-all approved — run `apply`
+all approved — run `do`
 aurox [2 staged]> apply
 :: 2 install · 50.81 KiB
 :: about to elevate via sudo:
